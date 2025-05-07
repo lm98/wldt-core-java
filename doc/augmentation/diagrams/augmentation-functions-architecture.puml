@@ -1,0 +1,49 @@
+@startuml
+
+/' EVENTS '/
+interface "WldtEvent" as we
+interface "TriggeringEvent" as t {
+    + AugmentationFunctionFilter target()
+}
+t ..|> we
+interface "AugmentationEvent<T>" as Eaug {
+    + T body()
+}
+Eaug ..|> t
+interface "PhysicalEvent" as ept
+ept ..|> we
+interface "DigitalEvent" as edt
+edt ..|> we
+
+/' AUGMENTATION FUNCTIONS MODEL '/
+interface "AugmentationFunction<T>" as aug {
+    + T execute()
+}
+
+/' EXECUTION  '/
+interface "ExecutionContext" as ec
+interface "AugmentationFunctionExecutor" as EXaug {
+    + setExecutionContext(ExecutionContext ec)
+    + AugmentationEvent executeAugmentationFunction(AugmentationFunction<T> aug)
+}
+
+/' UTIL '/
+interface "WldtEventListener" as wel {
+    + onEvent(WldtEvent we)
+}
+interface "ShadowingFunction" as shad
+shad ..|> wel
+interface "EventBus" as ebus {
+    + subscribe(EventFilter ef)
+    + publish(WldtEvent we)
+}
+
+/' RELATIONSHIPS '/
+EXaug -- ec
+shad -- aug
+shad -- EXaug
+EXaug -> Eaug
+ebus -- we
+wel -- ebus
+
+@enduml

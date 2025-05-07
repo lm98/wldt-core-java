@@ -1,0 +1,60 @@
+@startuml
+
+/' EVENTS '/
+
+interface "TriggeringEvent" as t
+interface "AugmentationEvent<T>" as Eaug {
+    + T body()
+}
+Eaug ..|> t
+interface "TimerEvent" as etime 
+etime ..|> t
+class "VoidAugmentationEvent" as v <<final>> {
+    + void body()
+}
+v ..|> Eaug
+interface "PhysicalEvent" as ept
+ept ..|> t
+interface "DigitalEvent" as edt
+edt ..|> t
+
+/' AUGMENTATION FUNCTIONS MODEL '/
+
+interface "AugmentationFunction<T>" as aug {
+    + T execute()
+}
+interface "StatefulAugmentation<S>" as Saug {
+    + S lastState()
+    + List[S] history()
+}
+abstract class "StatefulAugmentationFunction<T, S>" as Staug {
+    + T execute()
+    + S lastState()
+    + List[S] history()
+}
+Staug ..|> aug
+Staug ..|> Saug
+
+/' EXECUTION  '/
+
+interface "ExecutionContext" as ec
+interface "AugmentationFunctionExecutor" as EXaug {
+    + setExecutionContext(ExecutionContext ec)
+    + AugmentationEvent executeAugmentationFunction(AugmentationFunction<T> aug)
+}
+
+
+/' UTIL '/
+interface "ShadowingFunction" as shad
+interface "StorageManager" as sm
+
+
+/' RELATIONSHIPS '/
+
+aug -- EXaug
+shad -up-> EXaug
+ec -- EXaug
+EXaug -left-> Eaug
+t -right- shad
+Saug -- sm
+@enduml
