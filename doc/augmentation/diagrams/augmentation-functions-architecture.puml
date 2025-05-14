@@ -38,6 +38,12 @@ interface "EventBus" as ebus {
     + publish(WldtEvent we)
 }
 
+interface "SyncInterface" as si {
+    + publishAugmentationEventToRemoteBus(AugmentationEvent ae)
+    + receiveAugmentationEventFromRemoteBus(AugmentationEvent ae)
+}
+si ..|> wel
+
 /' RELATIONSHIPS '/
 EXaug -- ec
 shad -- aug
@@ -46,4 +52,7 @@ EXaug -> Eaug
 ebus -- we
 wel -- ebus
 
+/' NOTES '/
+note "Listens for remote Eaug and can publish to the remote bus Eaugs.\nModeled similarly to PI and DI." as n1
+n1 .. si
 @enduml
