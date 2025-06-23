@@ -6,6 +6,7 @@ import it.wldt.adapter.digital.DigitalAdapterListener;
 import it.wldt.adapter.physical.PhysicalAdapter;
 import it.wldt.adapter.physical.PhysicalAdapterListener;
 import it.wldt.adapter.physical.PhysicalAssetDescription;
+import it.wldt.augmentation.AugmentationFunction;
 import it.wldt.core.event.DefaultWldtEventLogger;
 import it.wldt.core.event.EventManager;
 import it.wldt.core.event.WldtEventBus;
@@ -64,6 +65,11 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
     private ExecutorService digitalAdapterExecutor = null;
 
     /**
+     * Executor Service for Augmentation Functions
+     */
+    private ExecutorService augmentationFunctionExecutor = null;
+
+    /**
      * Executor Service for Digital Adapters
      */
     private List<String> digitalizedPhysicalAssets;
@@ -77,6 +83,11 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
      * List of Digital Adapters
      */
     private List<DigitalAdapter<?>> digitalAdapterList;
+
+    /**
+     * List of Augmentation Functions
+     */
+    private List<AugmentationFunction> augmentationFunctionList;
 
     /**
      * Map of PhysicalAssetDescription associated to each Physical Adapter
@@ -175,6 +186,8 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
         this.physicalAdapterList = new ArrayList<>();
 
         this.digitalAdapterList = new ArrayList<>();
+
+        this.augmentationFunctionList = new ArrayList<>();
 
         init(shadowingFunction);
     }
@@ -578,6 +591,39 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
     }
 
     /**
+     * Adds a new Augmentation Function to the Digital Twin.
+     * @param augmentationFunction
+     * @throws WldtConfigurationException
+     * @throws WldtWorkerException
+     */
+    public void addAugmentationFunction(AugmentationFunction augmentationFunction) throws WldtConfigurationException, WldtWorkerException {
+
+        if(augmentationFunction != null
+                && this.getAugmentationFunctionList() != null
+                && !this.getAugmentationFunctionList().contains(augmentationFunction)) {
+
+            augmentationFunction.setDigitalTwinId(this.digitalTwinId);
+            this.getAugmentationFunctionList().add(augmentationFunction);
+
+            logger.debug("{} New Augmentation Function ({}) Added to the Worker List ! Augmentation Functions - Worker List Size: {}", TAG, augmentationFunction.getClass().getName(), this.getAugmentationFunctionList().size());
+        }
+        else
+            throw new WldtConfigurationException("Invalid Augmentation Function, Already added or List Limit Reached !");
+    }
+
+    /**
+     * Clear the list of configured Augmentation Functions
+     *
+     * @throws WldtConfigurationException
+     */
+    public void clearAugmentationFunctionList() throws WldtConfigurationException {
+        if (this.getAugmentationFunctionList() != null) {
+            this.getAugmentationFunctionList().clear();
+        } else
+            throw new WldtConfigurationException("Error Cleaning Augmentation Functions ! List is Null !");
+    }
+
+    /**
      * Starts the life cycle of the digital twin. This method initiates the execution of the model engine and physical/digital adapters.
      * It ensures that both physical and digital adapters are available before starting the life cycle.
      * This method is used by the Digital Twin Engine to coordinate the execution of its configured DTs.
@@ -612,12 +658,20 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
             digitalAdapterExecutor.execute(digitalAdapter);
         });
 
+        //Init AugmentationFunction Executor
+        augmentationFunctionExecutor = Executors.newFixedThreadPool(this.getAugmentationFunctionList().size());
+
+        this.getAugmentationFunctionList().forEach(augmentationFunction -> {
+            logger.info("Executing AugmentationFunction: {}", augmentationFunction.getClass());
+            augmentationFunctionExecutor.execute(augmentationFunction);
+        });
+
         //When all Physical and Digital Adapters have been started the DT moves to the Start State
         notifyLifeCycleOnStart();
 
         physicalAdapterExecutor.shutdown();
 
-        while (!physicalAdapterExecutor.isTerminated() && ! digitalAdapterExecutor.isTerminated()) {}
+        while (!physicalAdapterExecutor.isTerminated() && ! digitalAdapterExecutor.isTerminated() && ! augmentationFunctionExecutor.isTerminated()) {}
 
     }
 
@@ -646,6 +700,11 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
             this.digitalAdapterExecutor = null;
             for(DigitalAdapter<?> digitalAdapter : this.getDigitalAdapterList())
                 digitalAdapter.onWorkerStop();
+
+            this.augmentationFunctionExecutor.shutdownNow();
+            this.augmentationFunctionExecutor = null;
+            for(AugmentationFunction augmentationFunction : this.getAugmentationFunctionList())
+                augmentationFunction.onWorkerStop();
 
             notifyLifeCycleOnStop();
             notifyLifeCycleOnDestroy();
@@ -874,6 +933,15 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
      */
     protected List<DigitalAdapter<?>> getDigitalAdapterList() {
         return digitalAdapterList;
+    }
+
+    /**
+     * Gets a list of registered augmentation functions.
+     *
+     * @return An unmodifiable list of augmentation functions.
+     */
+    protected List<AugmentationFunction> getAugmentationFunctionList() {
+        return augmentationFunctionList;
     }
 
     /**
