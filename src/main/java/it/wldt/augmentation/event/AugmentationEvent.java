@@ -15,6 +15,7 @@ import java.util.Map;
  * AugmentationFunction.
  */
 public abstract class AugmentationEvent<T> extends WldtEvent<T> {
+    public static final String EVENT_BASIC_TYPE = "dt.augmentation.event";
 
     public AugmentationEvent(String type) throws EventBusException {
         super(type);
