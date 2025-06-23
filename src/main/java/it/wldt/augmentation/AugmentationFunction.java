@@ -1,14 +1,19 @@
 package it.wldt.augmentation;
 
+import it.wldt.adapter.physical.event.PhysicalAssetActionWldtEvent;
 import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.engine.DigitalTwinWorker;
 import it.wldt.core.event.WldtEvent;
 import it.wldt.core.event.WldtEventBus;
+import it.wldt.core.event.WldtEventFilter;
 import it.wldt.core.event.WldtEventListener;
 import it.wldt.exception.EventBusException;
 import it.wldt.exception.WldtRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Authors:
@@ -28,8 +33,19 @@ public abstract class AugmentationFunction extends DigitalTwinWorker implements 
 
     private final String id;
 
+    private WldtEventFilter augmentationEventFilter;
+
+    private List<AugmentationEvent<?>> augmentationEvents = new ArrayList<>();
+
     public AugmentationFunction(String id) {
         this.id = id;
+    }
+
+    public AugmentationFunction(String id, List<AugmentationEvent<?>> augmentationEvents) {
+        this.id = id;
+        if (augmentationEvents != null) {
+            this.augmentationEvents.addAll(augmentationEvents);
+        }
     }
 
     @Override
@@ -45,6 +61,16 @@ public abstract class AugmentationFunction extends DigitalTwinWorker implements 
     @Override
     public void onWorkerStart() throws WldtRuntimeException {
         try {
+            if (this.augmentationEventFilter == null) {
+                this.augmentationEventFilter = new WldtEventFilter();
+            }
+            this.augmentationEvents.forEach(augmentationEvent ->
+                    this.augmentationEventFilter.add(AugmentationEvent.buildEventType(
+                            AugmentationEvent.EVENT_BASIC_TYPE,
+                            augmentationEvent.getType())));
+
+            WldtEventBus.getInstance().subscribe(this.digitalTwinId, this.id, this.augmentationEventFilter, this);
+
             onAugmentationStart();
         }
         catch (Exception e) {
@@ -76,6 +102,17 @@ public abstract class AugmentationFunction extends DigitalTwinWorker implements 
 
     protected void publishAugmentationEvent(AugmentationEvent<?> augmentationEvent) throws EventBusException {
         WldtEventBus.getInstance().publishEvent(this.digitalTwinId, this.id, augmentationEvent);
+    }
+
+    protected void addAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+        if (augmentationEvent != null) {
+            this.augmentationEvents.add(augmentationEvent);
+            if (this.augmentationEventFilter != null) {
+                this.augmentationEventFilter.add(AugmentationEvent.buildEventType(
+                        AugmentationEvent.EVENT_BASIC_TYPE,
+                        augmentationEvent.getType()));
+            }
+        }
     }
 
     protected abstract void onAugmentationStart();
