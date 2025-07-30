@@ -35,7 +35,9 @@ public abstract class AugmentationFunction extends DigitalTwinWorker implements 
 
     private WldtEventFilter augmentationEventFilter;
 
-    private List<AugmentationEvent<?>> augmentationEvents = new ArrayList<>();
+    private final List<AugmentationEvent<?>> augmentationEvents = new ArrayList<>();
+
+    private AugmentationFunctionListener augmentationFunctionListener;
 
     public AugmentationFunction(String id) {
         this.id = id;
@@ -72,6 +74,8 @@ public abstract class AugmentationFunction extends DigitalTwinWorker implements 
             WldtEventBus.getInstance().subscribe(this.digitalTwinId, this.id, this.augmentationEventFilter, this);
 
             onAugmentationStart();
+
+            notifyAugmentationFunctionStart();
         }
         catch (Exception e) {
             throw new WldtRuntimeException(e.getLocalizedMessage());
@@ -112,6 +116,12 @@ public abstract class AugmentationFunction extends DigitalTwinWorker implements 
                         AugmentationEvent.EVENT_BASIC_TYPE,
                         augmentationEvent.getType()));
             }
+        }
+    }
+
+    protected void notifyAugmentationFunctionStart() {
+        if (this.augmentationFunctionListener != null) {
+            this.augmentationFunctionListener.onAugmentationStart();
         }
     }
 
