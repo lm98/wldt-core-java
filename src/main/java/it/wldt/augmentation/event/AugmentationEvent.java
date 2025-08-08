@@ -44,5 +44,7 @@ public abstract class AugmentationEvent<T> extends WldtEvent<T> {
             return null;
     }
 
-    abstract protected String getBasicEventType();
+    private String getBasicEventType() {
+        return EVENT_BASIC_TYPE;
+    }
 }
