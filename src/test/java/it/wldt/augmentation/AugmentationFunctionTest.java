@@ -3,13 +3,10 @@ package it.wldt.augmentation;
 import it.wldt.adapter.digital.DigitalAdapter;
 import it.wldt.adapter.physical.PhysicalAdapter;
 import it.wldt.augmentation.event.AugmentationEvent;
-import it.wldt.augmentation.event.EmptyAugmentationEvent;
-import it.wldt.augmentation.simple.DefaultDigitalAdapter;
-import it.wldt.augmentation.simple.DefaultPhysicalAdapter;
-import it.wldt.augmentation.simple.SimpleShadowingFunction;
+import it.wldt.augmentation.factorial.FactorialAugmentationFunction;
+import it.wldt.augmentation.factorial.event.FactorialEvents;
 import it.wldt.core.engine.DigitalTwin;
 import it.wldt.core.engine.DigitalTwinEngine;
-import it.wldt.exception.EventBusException;
 
 public class AugmentationFunctionTest {
 
@@ -21,18 +18,12 @@ public class AugmentationFunctionTest {
 
         // Create dt
         try {
-            DigitalTwin dt = new DigitalTwin("dt00001", new SimpleShadowingFunction());
+            DigitalTwin dt = new DigitalTwin("dt00001", new TestShadowingFunction());
             dt.addDigitalAdapter(digitalAdapter);
             dt.addPhysicalAdapter(physicalAdapter);
 
-            AugmentationEvent<?> event = new EmptyAugmentationEvent();
-            dt.addAugmentationFunction(event.getType(), (e) -> {
-                try {
-                    return new EmptyAugmentationEvent();
-                } catch (EventBusException ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+            AugmentationEvent<?> event = new FactorialEvents.FactorialRequest(1);
+            dt.addAugmentationFunction(event.getType(), new FactorialAugmentationFunction());
             engine.addDigitalTwin(dt);
             engine.startAll();
         } catch (Exception e) {

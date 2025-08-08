@@ -1,9 +1,10 @@
-package it.wldt.augmentation.simple;
+package it.wldt.augmentation;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import it.wldt.augmentation.event.AugmentationEvent;
+import it.wldt.augmentation.factorial.event.FactorialEvents;
 import it.wldt.core.event.WldtEventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,11 @@ import it.wldt.exception.ModelException;
 import it.wldt.exception.WldtDigitalTwinStateEventNotificationException;
 import it.wldt.exception.WldtDigitalTwinStateException;
 
-public class SimpleShadowingFunction extends ShadowingFunction {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleShadowingFunction.class);
+public class TestShadowingFunction extends ShadowingFunction {
+    private static final Logger logger = LoggerFactory.getLogger(TestShadowingFunction.class);
     private static final String DEFAULT_SHADOWING_FUNCTION_ID = "default-shadowing-function";
 
-    public SimpleShadowingFunction() {
+    public TestShadowingFunction() {
         super(DEFAULT_SHADOWING_FUNCTION_ID);
     }
 
@@ -70,7 +71,7 @@ public class SimpleShadowingFunction extends ShadowingFunction {
 
             this.observeDigitalActionEvents();
 
-            AugmentationEvent<Void> augmentationEvent = new SimpleAugmentationEvent("simple");
+            FactorialEvents.FactorialRequest augmentationEvent = new FactorialEvents.FactorialRequest(5);
             sendAugmentationEvent(augmentationEvent);
 
         } catch (EventBusException | ModelException | WldtDigitalTwinStateException e) {

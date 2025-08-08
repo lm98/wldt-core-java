@@ -1,4 +1,4 @@
-package it.wldt.augmentation.simple;
+package it.wldt.augmentation;
 
 import it.wldt.adapter.physical.PhysicalAdapter;
 import it.wldt.adapter.physical.PhysicalAssetDescription;
