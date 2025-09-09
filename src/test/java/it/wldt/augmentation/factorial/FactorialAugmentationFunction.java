@@ -2,11 +2,14 @@ package it.wldt.augmentation.factorial;
 
 import it.wldt.augmentation.AugmentationFunction;
 import it.wldt.augmentation.event.AugmentationEvent;
+import it.wldt.core.event.WldtEventFilter;
 import it.wldt.exception.EventBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import it.wldt.augmentation.factorial.event.FactorialEvents.*;
+
+import java.util.Optional;
 
 /**
  * STATEFUL, RECURSIVE Augmentation Function as an example
@@ -14,22 +17,37 @@ import it.wldt.augmentation.factorial.event.FactorialEvents.*;
 public class FactorialAugmentationFunction implements AugmentationFunction {
     Logger logger = LoggerFactory.getLogger(FactorialAugmentationFunction.class);
     private Integer result = 1;
+    private final WldtEventFilter eventFilter = new WldtEventFilter();
+
+    public FactorialAugmentationFunction() {
+        this.eventFilter.add(FactorialRequest.buildEventType(FactorialRequest.EVENT_BASIC_TYPE, "factorial.request"));
+    }
 
     @Override
-    public AugmentationEvent<?> receive(AugmentationEvent<?> input) {
+    public String getId() {
+        return "factorial-augmentation-function";
+    }
+
+    @Override
+    public WldtEventFilter getEventFilter() {
+        return eventFilter;
+    }
+
+    @Override
+    public Optional<AugmentationEvent<?>> receive(AugmentationEvent<?> input) {
         try {
             if (input instanceof FactorialRequest) {
                 Integer asked = (Integer) input.getBody();
                 if (asked < 2) {
-                    return new FactorialResult(this.result);
+                    return Optional.of(new FactorialResult(this.result));
                 } else {
                     this.result *= asked;
-                    return new FactorialRequest(asked - 1);
+                    return Optional.of(new FactorialRequest(asked - 1));
                 }
             }
         } catch (EventBusException e) {
             logger.error("An error occurred: {}", e.getMessage());
         }
-        return null;
+        return Optional.empty();
     }
 }

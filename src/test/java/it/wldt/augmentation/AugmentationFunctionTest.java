@@ -2,9 +2,7 @@ package it.wldt.augmentation;
 
 import it.wldt.adapter.digital.DigitalAdapter;
 import it.wldt.adapter.physical.PhysicalAdapter;
-import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.augmentation.factorial.FactorialAugmentationFunction;
-import it.wldt.augmentation.factorial.event.FactorialEvents;
 import it.wldt.core.engine.DigitalTwin;
 import it.wldt.core.engine.DigitalTwinEngine;
 
@@ -22,8 +20,7 @@ public class AugmentationFunctionTest {
             dt.addDigitalAdapter(digitalAdapter);
             dt.addPhysicalAdapter(physicalAdapter);
 
-            AugmentationEvent<?> event = new FactorialEvents.FactorialRequest(1);
-            dt.addAugmentationFunction(event.getType(), new FactorialAugmentationFunction());
+            dt.addAndStartAugmentationFunction(new FactorialAugmentationFunction());
             engine.addDigitalTwin(dt);
             engine.startAll();
         } catch (Exception e) {
