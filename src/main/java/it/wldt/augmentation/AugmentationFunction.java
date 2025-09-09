@@ -1,8 +1,13 @@
 package it.wldt.augmentation;
 
 import it.wldt.augmentation.event.AugmentationEvent;
+import it.wldt.core.event.WldtEventFilter;
 
-@FunctionalInterface
+import java.util.Optional;
+
+
 public interface AugmentationFunction {
-    AugmentationEvent<?> receive(AugmentationEvent<?> input);
+    String getId();
+    WldtEventFilter getEventFilter();
+    Optional<AugmentationEvent<?>> receive(AugmentationEvent<?> input);
 }

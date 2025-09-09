@@ -10,9 +10,8 @@ import it.wldt.exception.EventBusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,9 +36,9 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
 
     private final String id;
 
-    private final WldtEventFilter augmentationEventFilter = new WldtEventFilter();
+    private final Map<String, AugmentationFunction> functions = new ConcurrentHashMap<>();
 
-    private final Map<String, AugmentationFunction> augmentationFunctions = new ConcurrentHashMap<>();
+    private final Map<String, AugmentationFunction> activeFunctions = new ConcurrentHashMap<>();
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -64,22 +63,25 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
         if (wldtEvent instanceof AugmentationEvent) {
             AugmentationEvent<?> event = (AugmentationEvent<?>) wldtEvent;
             String eventType = event.getType();
-            AugmentationFunction function = augmentationFunctions.get(eventType);
-            if (function != null) {
-                logger.debug("{} -> Executing Augmentation Function for event type: {}", id, eventType);
-                executorService.submit(() -> {
-                    AugmentationEvent<?> result = function.receive(event);
-                    if (result != null) {
-                        try {
-                            publishAugmentationEvent(result);
-                        } catch (EventBusException e) {
-                            logger.error("{} -> Error publishing Augmentation Event: {}", id, e.getMessage(), e);
-                        }
-                    } else {
-                        logger.warn("{} -> Augmentation Function returned null for event type: {}", id, eventType);
-                    }
-                });
-            }
+            activeFunctions
+                    .values()
+                    .stream()
+                    .filter(function -> function.getEventFilter().contains(eventType))
+                    .forEach(function -> {
+                        logger.debug("{} -> Executing Augmentation Function {} for event type: {}", id, function.getId(), eventType);
+                        executorService.submit(() -> {
+                            Optional<AugmentationEvent<?>> result = function.receive(event);
+                            if (result.isPresent()) {
+                                try {
+                                    publishAugmentationEvent(result.get());
+                                } catch (EventBusException e) {
+                                    logger.error("{} -> Error publishing Augmentation Event: {}", id, e.getMessage(), e);
+                                }
+                            } else {
+                                logger.warn("{} -> Augmentation Function returned null for event type: {}", id, eventType);
+                            }
+                        });
+                    });
         }
     }
 
@@ -95,23 +97,36 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
      * Adds an AugmentationEvent to the list of events that this AugmentationFunctionExecutor will listen to.
      * It also subscribes to the event type in the WldtEventBus.
      *
-     * @param augmentationEvent The AugmentationEvent to be added.
+     * @param augmentationEventFilter The AugmentationEvents to listen to.
      * @throws EventBusException If there is an error while subscribing to the event.
      */
-    private void addAugmentationEvent(String augmentationEvent) throws EventBusException {
-        if (augmentationEvent != null) {
-            this.augmentationEventFilter.add(augmentationEvent);
-            WldtEventBus.getInstance().subscribe(this.digitalTwinId, this.id, this.augmentationEventFilter, this);
-        }
+    private void addAugmentationEventFilter(WldtEventFilter augmentationEventFilter) throws EventBusException {
+        WldtEventBus.getInstance().subscribe(this.digitalTwinId, this.id, augmentationEventFilter, this);
     }
 
-    public void addAugmentationFunction(String event, AugmentationFunction function) throws EventBusException {
+    public void addAugmentationFunction(AugmentationFunction function) throws EventBusException {
         if (function != null) {
-            addAugmentationEvent(event);
-            this.augmentationFunctions.put(event, function);
+            addAugmentationEventFilter(function.getEventFilter());
+            this.functions.put(function.getId(), function);
             logger.debug("{} -> Added Augmentation Function: {}", id, function.getClass().getSimpleName());
         } else {
             logger.warn("{} -> Attempted to add a null Augmentation Function", id);
         }
+    }
+
+    public void addAndStartAugmentationFunction(AugmentationFunction function) throws EventBusException {
+        addAugmentationFunction(function);
+        startAugmentationFunction(function.getId());
+    }
+
+    public void startAugmentationFunction(String id) {
+        if(this.functions.containsKey(id)) {
+            AugmentationFunction fun = this.functions.get(id);
+            this.activeFunctions.put(fun.getId(), fun);
+        }
+    }
+
+    public void stopAugmentationFunction(String id) {
+        this.activeFunctions.remove(id);
     }
 }

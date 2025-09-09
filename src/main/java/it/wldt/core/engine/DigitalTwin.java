@@ -592,8 +592,15 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
     /**
      * Adds a new Augmentation Function to the Digital Twin.
      */
-    public void addAugmentationFunction(String event, AugmentationFunction augmentationFunction) throws EventBusException {
-        this.augmentationFunctionExecutor.addAugmentationFunction(event, augmentationFunction);
+    public void addAugmentationFunction(AugmentationFunction augmentationFunction) throws EventBusException {
+        this.augmentationFunctionExecutor.addAugmentationFunction(augmentationFunction);
+    }
+
+    /**
+     * Adds a new Augmentation Function to the Digital Twin.
+     */
+    public void addAndStartAugmentationFunction(AugmentationFunction augmentationFunction) throws EventBusException {
+        this.augmentationFunctionExecutor.addAndStartAugmentationFunction(augmentationFunction);
     }
 
     /**
