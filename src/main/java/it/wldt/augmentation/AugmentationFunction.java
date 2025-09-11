@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface AugmentationFunction {
     String getId();
-    WldtEventFilter getEventFilter();
+    WldtEventFilter inputEvents();
+    WldtEventFilter outputEvents();
     Optional<AugmentationEvent<?>> receive(AugmentationEvent<?> input);
 }

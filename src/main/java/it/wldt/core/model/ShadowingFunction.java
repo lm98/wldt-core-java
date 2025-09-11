@@ -344,6 +344,16 @@ public abstract class ShadowingFunction implements WldtEventListener {
         WldtEventBus.getInstance().unSubscribe(this.digitalTwinStateManager.getDigitalTwinId(), this.id, wldtEventFilter, this);
     }
 
+    ///////////////////// AUGMENTATION EVENT OBSERVATION MANAGEMENT ////////////////////////////////
+
+    /**
+     * Observe an Augmentation Function
+     * @param augmentationFunction
+     * @throws EventBusException
+     */
+    protected void observeAugmentationFunctionOutput(AugmentationFunction augmentationFunction) throws EventBusException {
+        WldtEventBus.getInstance().subscribe(this.digitalTwinStateManager.getDigitalTwinId(), this.id, augmentationFunction.outputEvents(), this);
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -417,6 +427,8 @@ public abstract class ShadowingFunction implements WldtEventListener {
         //if(wldtEvent.getType().equals(DigitalAdapter.DIGITAL_ACTION_EVENT))
         //    onDigitalActionEvent((DigitalActionWldtEvent<?>) wldtEvent.getBody());
 
+        if(wldtEvent instanceof AugmentationEvent<?>)
+            onAugmentationEvent((AugmentationEvent<?>) wldtEvent);
     }
 
     abstract protected void onCreate();
@@ -440,6 +452,8 @@ public abstract class ShadowingFunction implements WldtEventListener {
     abstract protected void onPhysicalAssetRelationshipDeleted(PhysicalAssetRelationshipInstanceDeletedWldtEvent<?> physicalAssetRelationshipWldtEvent);
 
     abstract protected void onDigitalActionEvent(DigitalActionWldtEvent<?> digitalActionWldtEvent);
+
+    abstract protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent);
 
     public String getId() {
         return id;
