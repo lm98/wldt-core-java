@@ -70,7 +70,7 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
     /**
      * Executor Service for Augmentation Functions
      */
-    private final AugmentationFunctionExecutor augmentationFunctionExecutor;
+    private AugmentationFunctionExecutor augmentationFunctionExecutor;
 
     /**
      * Executor Service for Digital Adapters
@@ -186,8 +186,6 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
 
         this.digitalAdapterList = new ArrayList<>();
 
-        this.augmentationFunctionExecutor = new AugmentationFunctionExecutor(this.digitalTwinId, "Augmentation Function Executor");
-
         init(shadowingFunction);
     }
 
@@ -246,6 +244,9 @@ public class DigitalTwin implements ShadowingModelListener, PhysicalAdapterListe
 
         // Initialize the Digital Twin Model with digital twin ID, state manager, shadowing function, and storage manager
         this.digitalTwinModel = new DigitalTwinModel(this.digitalTwinId, this.digitalTwinStateManager, this.shadowingFunction, this.storageManager);
+
+        this.augmentationFunctionExecutor = new AugmentationFunctionExecutor(this.digitalTwinId, "Augmentation Function Executor", this.shadowingFunction);
+
 
         //Save the Model Engine as Digital Twin Life Cycle Listener
         addLifeCycleListener(this.digitalTwinModel);

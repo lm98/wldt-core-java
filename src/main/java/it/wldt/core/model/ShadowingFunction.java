@@ -5,6 +5,9 @@ import it.wldt.adapter.physical.PhysicalAssetDescription;
 import it.wldt.adapter.physical.PhysicalAssetEvent;
 import it.wldt.adapter.physical.PhysicalAssetProperty;
 import it.wldt.adapter.physical.PhysicalAssetRelationship;
+import it.wldt.augmentation.AugmentationFunction;
+import it.wldt.augmentation.AugmentationFunctionListener;
+import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.event.*;
 import it.wldt.core.state.DigitalTwinStateManager;
 import it.wldt.exception.EventBusException;
@@ -30,7 +33,7 @@ import java.util.Objects;
  *  - Life Cycle Management
  *  - Incoming and outgoing events of both Physical and Digital Adapters
  */
-public abstract class ShadowingFunction implements WldtEventListener {
+public abstract class ShadowingFunction implements WldtEventListener, AugmentationFunctionListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ShadowingFunction.class);
 

@@ -36,15 +36,18 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
 
     private final String id;
 
+    private final AugmentationFunctionListener augmentationFunctionListener;
+
     private final Map<String, AugmentationFunction> functions = new ConcurrentHashMap<>();
 
     private final Map<String, AugmentationFunction> activeFunctions = new ConcurrentHashMap<>();
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-    public AugmentationFunctionExecutor(String digitalTwinId, String id) {
+    public AugmentationFunctionExecutor(String digitalTwinId, String id, AugmentationFunctionListener listener) {
         this.digitalTwinId = digitalTwinId;
         this.id = id;
+        this.augmentationFunctionListener = listener;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
             activeFunctions
                     .values()
                     .stream()
-                    .filter(function -> function.getEventFilter().contains(eventType))
+                    .filter(function -> function.inputEvents().contains(eventType))
                     .forEach(function -> {
                         logger.debug("{} -> Executing Augmentation Function {} for event type: {}", id, function.getId(), eventType);
                         executorService.submit(() -> {
@@ -106,8 +109,9 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
 
     public void addAugmentationFunction(AugmentationFunction function) throws EventBusException {
         if (function != null) {
-            addAugmentationEventFilter(function.getEventFilter());
+            addAugmentationEventFilter(function.inputEvents());
             this.functions.put(function.getId(), function);
+            this.augmentationFunctionListener.onAugmentationFunctionAdded(function);
             logger.debug("{} -> Added Augmentation Function: {}", id, function.getClass().getSimpleName());
         } else {
             logger.warn("{} -> Attempted to add a null Augmentation Function", id);
@@ -123,10 +127,18 @@ public class AugmentationFunctionExecutor implements WldtEventListener {
         if(this.functions.containsKey(id)) {
             AugmentationFunction fun = this.functions.get(id);
             this.activeFunctions.put(fun.getId(), fun);
+            this.augmentationFunctionListener.onAugmentationFunctionStart(fun);
         }
     }
 
     public void stopAugmentationFunction(String id) {
-        this.activeFunctions.remove(id);
+        try {
+            AugmentationFunction fun = this.activeFunctions.get(id);
+            this.activeFunctions.remove(id);
+            this.augmentationFunctionListener.onAugmentationFunctionStop(fun);
+        } catch (Exception e) {
+            logger.warn("{} -> Attempted to stop a missing function", id);
+        }
+
     }
 }
