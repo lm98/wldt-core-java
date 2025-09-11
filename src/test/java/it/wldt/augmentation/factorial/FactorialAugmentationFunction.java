@@ -17,10 +17,12 @@ import java.util.Optional;
 public class FactorialAugmentationFunction implements AugmentationFunction {
     Logger logger = LoggerFactory.getLogger(FactorialAugmentationFunction.class);
     private Integer result = 1;
-    private final WldtEventFilter eventFilter = new WldtEventFilter();
+    private final WldtEventFilter inputEvents = new WldtEventFilter();
+    private final WldtEventFilter outputEvents = new WldtEventFilter();
 
     public FactorialAugmentationFunction() {
-        this.eventFilter.add(FactorialRequest.buildEventType(FactorialRequest.EVENT_BASIC_TYPE, "factorial.request"));
+        this.inputEvents.add(FactorialRequest.buildEventType(FactorialRequest.EVENT_BASIC_TYPE, "factorial.request"));
+        this.outputEvents.add(FactorialRequest.buildEventType(FactorialRequest.EVENT_BASIC_TYPE, "factorial.result"));
     }
 
     @Override
@@ -29,8 +31,13 @@ public class FactorialAugmentationFunction implements AugmentationFunction {
     }
 
     @Override
-    public WldtEventFilter getEventFilter() {
-        return eventFilter;
+    public WldtEventFilter inputEvents() {
+        return inputEvents;
+    }
+
+    @Override
+    public WldtEventFilter outputEvents() {
+        return outputEvents;
     }
 
     @Override

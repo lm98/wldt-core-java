@@ -1,5 +1,7 @@
 package it.wldt.core.lifecycle;
 
+import it.wldt.augmentation.AugmentationFunction;
+import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.adapter.digital.TestDigitalAdapter;
 import it.wldt.core.adapter.physical.TestPhysicalAdapter;
 import it.wldt.core.adapter.physical.TestPhysicalAdapterConfiguration;
@@ -157,8 +159,28 @@ public class LifeCycleTester {
             }
 
             @Override
+            protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+
+            }
+
+            @Override
             protected void onPhysicalAssetEventNotification(PhysicalAssetEventWldtEvent<?> physicalAssetEventWldtEvent) {
                 logger.info("ShadowingFunction Physical Asset Event - Event Received: {}", physicalAssetEventWldtEvent);
+            }
+
+            @Override
+            public void onAugmentationFunctionAdded(AugmentationFunction augmentationFunction) {
+
+            }
+
+            @Override
+            public void onAugmentationFunctionStart(AugmentationFunction augmentationFunction) {
+
+            }
+
+            @Override
+            public void onAugmentationFunctionStop(AugmentationFunction augmentationFunction) {
+
             }
 
         });
@@ -230,6 +252,7 @@ public class LifeCycleTester {
             public void onDestroy() {
                 logger.debug("LifeCycleListener - onDestroy()");
             }
+
         });
 
         digitalTwinEngine.addDigitalTwin(digitalTwin, true);

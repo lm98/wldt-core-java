@@ -1,5 +1,7 @@
 package it.wldt.core.adapter;
 
+import it.wldt.augmentation.AugmentationFunction;
+import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.adapter.digital.TestDigitalAdapter;
 import it.wldt.core.adapter.digital.TestDigitalAdapterConfiguration;
 import it.wldt.adapter.digital.event.DigitalActionWldtEvent;
@@ -374,6 +376,26 @@ public class AdaptersTester {
 
             @Override
             protected void onDigitalActionEvent(DigitalActionWldtEvent<?> digitalActionWldtEvent) {
+
+            }
+
+            @Override
+            protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+
+            }
+
+            @Override
+            public void onAugmentationFunctionAdded(AugmentationFunction augmentationFunction) {
+
+            }
+
+            @Override
+            public void onAugmentationFunctionStart(AugmentationFunction augmentationFunction) {
+
+            }
+
+            @Override
+            public void onAugmentationFunctionStop(AugmentationFunction augmentationFunction) {
 
             }
         };

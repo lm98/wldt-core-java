@@ -198,4 +198,28 @@ public class TestShadowingFunction extends ShadowingFunction {
             e.printStackTrace();
         }
     }
+
+    @Override
+    protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+        logger.info("Shadowing - onAugmentationEvent - received:{}", augmentationEvent);
+    }
+
+    @Override
+    public void onAugmentationFunctionAdded(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStart(AugmentationFunction augmentationFunction) {
+        try {
+            this.observeAugmentationFunctionOutput(augmentationFunction);
+        } catch (Exception e) {
+            logger.warn("Shadowing - onAugmentationFunctionStart - failed to observe function {} output", augmentationFunction.getId());
+        }
+    }
+
+    @Override
+    public void onAugmentationFunctionStop(AugmentationFunction augmentationFunction) {
+
+    }
 }

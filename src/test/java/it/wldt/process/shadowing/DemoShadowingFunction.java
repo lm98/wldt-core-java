@@ -6,18 +6,16 @@ import it.wldt.adapter.physical.event.PhysicalAssetEventWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetPropertyWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceCreatedWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceDeletedWldtEvent;
+import it.wldt.augmentation.AugmentationFunction;
+import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.model.ShadowingFunction;
 import it.wldt.core.state.*;
 import it.wldt.exception.EventBusException;
 import it.wldt.process.metrics.SharedTestMetrics;
 import it.wldt.process.physical.DemoPhysicalAdapter;
-import it.wldt.storage.WldtStorage;
-import it.wldt.storage.model.physical.PhysicalAssetActionRequestRecord;
-import it.wldt.storage.model.physical.PhysicalAssetPropertyVariationRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
 public class DemoShadowingFunction extends ShadowingFunction {
@@ -294,6 +292,26 @@ public class DemoShadowingFunction extends ShadowingFunction {
         } catch (EventBusException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionAdded(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStart(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStop(AugmentationFunction augmentationFunction) {
+
     }
 
 }

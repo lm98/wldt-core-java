@@ -6,6 +6,8 @@ import it.wldt.adapter.physical.event.PhysicalAssetEventWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetPropertyWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceCreatedWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceDeletedWldtEvent;
+import it.wldt.augmentation.AugmentationFunction;
+import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.adapter.physical.TestPhysicalAdapter;
 import it.wldt.core.model.ShadowingFunction;
 import it.wldt.core.state.DigitalTwinStateAction;
@@ -217,7 +219,27 @@ public class TestShadowingFunction extends ShadowingFunction {
         }
     }
 
+    @Override
+    protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+
+    }
+
     public void simulateShadowingUnSync(){
         notifyShadowingOutOfSync();
+    }
+
+    @Override
+    public void onAugmentationFunctionAdded(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStart(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStop(AugmentationFunction augmentationFunction) {
+
     }
 }

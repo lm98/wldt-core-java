@@ -7,6 +7,8 @@ import it.wldt.adapter.physical.event.PhysicalAssetEventWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetPropertyWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceCreatedWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceDeletedWldtEvent;
+import it.wldt.augmentation.AugmentationFunction;
+import it.wldt.augmentation.event.AugmentationEvent;
 import it.wldt.core.model.ShadowingFunction;
 import it.wldt.core.state.DigitalTwinStateRelationship;
 import it.wldt.core.state.DigitalTwinStateRelationshipInstance;
@@ -125,6 +127,26 @@ public class RelationshipShadowingFunction extends ShadowingFunction {
 
     @Override
     protected void onDigitalActionEvent(DigitalActionWldtEvent<?> digitalActionWldtEvent) {
+
+    }
+
+    @Override
+    protected void onAugmentationEvent(AugmentationEvent<?> augmentationEvent) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionAdded(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStart(AugmentationFunction augmentationFunction) {
+
+    }
+
+    @Override
+    public void onAugmentationFunctionStop(AugmentationFunction augmentationFunction) {
 
     }
 
